@@ -63,76 +63,76 @@ VALUES  (1, 1, '2019-10-09', 3, 'Laura', 75, 180),
 	(20, 10, '2020-05-25', 2, 'Rob', 237, 100),
         (21, 9, '2020-02-28', 5, 'Laura', 86, 25);
 
-        -- What's the average weight of the games in my collection?
-        SELECT AVG (weight) FROM boardgames;
+-- What's the average weight of the games in my collection?
+SELECT AVG (weight) FROM boardgames;
         
-        -- For which designers do I have more than one game in my collection?
-        SELECT designer FROM boardgames
-        GROUP BY designer
-        HAVING COUNT(designer)>1;
+ -- For which designers do I have more than one game in my collection?
+SELECT designer FROM boardgames
+GROUP BY designer
+HAVING COUNT(designer)>1;
         
-        -- How often did I play with only 1 other player?
-        SELECT COUNT(number_of_players) FROM plays WHERE number_of_players = '2';
+-- How often did I play with only 1 other player?
+SELECT COUNT(number_of_players) FROM plays WHERE number_of_players = '2';
         
-        -- How many times did I win?
-        SELECT COUNT(winner) FROM plays WHERE winner = 'Laura';
+-- How many times did I win?
+SELECT COUNT(winner) FROM plays WHERE winner = 'Laura';
         
-        -- How many minutes did I play in February 2020?
-        SELECT SUM(time_played_in_min) FROM plays WHERE date BETWEEN '2020-02-01' AND '2020-02-29';
+-- How many minutes did I play in February 2020?
+SELECT SUM(time_played_in_min) FROM plays WHERE date BETWEEN '2020-02-01' AND '2020-02-29';
 	
-	 -- How many minutes did I play in the last 30 days?
-	  SELECT SUM(time_played_in_min) FROM plays 
-	  WHERE date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE();
+-- How many minutes did I play in the last 30 days?
+SELECT SUM(time_played_in_min) FROM plays 
+WHERE date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE();
         
-        -- How many different games did I play in February 2020?
-        SELECT COUNT(DISTINCT game_id) FROM plays;
+-- How many different games did I play in February 2020?
+SELECT COUNT(DISTINCT game_id) FROM plays;
         
-        -- Who won the most games? (Simple version if there are no ties)
-        SELECT winner, COUNT(*) AS wins
-        FROM plays
-        GROUP BY winner
-        ORDER BY wins DESC
-        LIMIT 1;
+-- Who won the most games? (Simple version if there are no ties)
+SELECT winner, COUNT(*) AS wins
+FROM plays
+GROUP BY winner
+ORDER BY wins DESC
+LIMIT 1;
 	
-	--Who won the most games? (Complex version considering ties)
-	SELECT winner, COUNT(winner) AS wins 
-	FROM plays
-	GROUP BY winner
-	HAVING COUNT(winner)=
+--Who won the most games? (Complex version considering ties)
+SELECT winner, COUNT(winner) AS wins 
+FROM plays
+GROUP BY winner
+HAVING COUNT(winner)=
 	(
-		SELECT MAX(wins) 
-		FROM 	
-		(
-			SELECT winner, COUNT(winner) AS wins
-			FROM plays AS wincount
-			GROUP BY winner
-		) 
-		AS maxwins
-	);
+	SELECT MAX(wins) 
+	FROM 	
+	(
+		SELECT winner, COUNT(winner) AS wins
+		FROM plays AS wincount
+		GROUP BY winner
+	) 
+	AS maxwins
+);
 	
-	-- How often have I played "Great Western Trail"?
-	SELECT COUNT(*) from plays
-	JOIN boardgames ON plays.game_id=boardgames.id
-	WHERE boardgames.name = 'Great Western Trail';
+-- How often have I played "Great Western Trail"?
+SELECT COUNT(*) from plays
+JOIN boardgames ON plays.game_id=boardgames.id
+WHERE boardgames.name = 'Great Western Trail';
 	
-	-- How many minutes did I spend playing games in a category that contains "building"?
-	SELECT SUM(time_played_in_min) 
-	FROM plays
-	JOIN boardgames ON plays.game_id = boardgames.id
-	WHERE boardgames.category LIKE '%Building%';
+-- How many minutes did I spend playing games in a category that contains "building"?
+SELECT SUM(time_played_in_min) 
+FROM plays
+JOIN boardgames ON plays.game_id = boardgames.id
+WHERE boardgames.category LIKE '%Building%';
 	
-	-- How many times have I played each of my games?
-	SELECT boardgames.name, COUNT(plays.play_id) AS plays
-	FROM plays
-	RIGHT JOIN boardgames ON plays.game_id = boardgames.id
-	GROUP BY boardgames.name
-	ORDER BY plays DESC
+-- How many times have I played each of my games?
+SELECT boardgames.name, COUNT(plays.play_id) AS plays
+FROM plays
+RIGHT JOIN boardgames ON plays.game_id = boardgames.id
+GROUP BY boardgames.name
+ORDER BY plays DESC
 	
-	-- What's the weight of each of my games in words?
-	SELECT name, weight, 
-	CASE
-		WHEN weight >3 THEN 'Heavy'
-   		WHEN weight >2 THEN 'Medium'
-  		ELSE 'Light'
-	END AS weight_description
-	FROM boardgames;
+-- What's the weight of each of my games in words?
+SELECT name, weight, 
+CASE
+	WHEN weight >3 THEN 'Heavy'
+   	WHEN weight >2 THEN 'Medium'
+  	ELSE 'Light'
+END AS weight_description
+FROM boardgames;
