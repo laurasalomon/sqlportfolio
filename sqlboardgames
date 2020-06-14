@@ -1,0 +1,91 @@
+-- SQL Boardgame Data Project by Laura Salomon
+
+CREATE TABLE boardgames
+      (
+		    id INT NOT NULL,
+        name VARCHAR(100),
+		    designer VARCHAR(100),
+	    	year_published YEAR,
+        category VARCHAR(100),
+        weight DOUBLE,
+        rating DOUBLE,
+        PRIMARY KEY (id)
+      );
+INSERT INTO boardgames (id, name, designer, year_published, category, weight, rating)
+VALUES (1, 'Terraforming Mars', 'Jacob Fryxelius', 2016, 'Tableau Building', 3.2, 8.4),
+	  (2, 'Great Western Trail', 'Alexander Pfister', 2016, 'Board Movement', 3.7, 8.3),
+    (3, 'Sushi Go', 'Phil Walker-Harding', 2013, 'Card Drafting', 1.2, 7.6),
+    (4, 'Dominion', 'Donald X. Vaccarino', 2008, 'Deck Building', 2.4, 7.6),
+    (5, 'Settlers of Catan', 'Klaus Teuber', 1995, 'Area Control', 2.3, 7.2),
+    (6, 'Clank!', 'Paul Dennen', 2016, 'Deck Building', 2.2, 7.8),
+    (7, 'Wingspan', 'Elizabeth Hargrave', 2019, 'Tableau Building', 2.4, 8.1),
+    (8, 'Underwater Cities', 'Vladimir Suchy', 2018, 'Worker Placement', 3.6, 8.1),
+    (9, 'Welcome To', 'Benoit Turpin', 2018, 'Roll and Write', 1.8, 7.6),
+    (10, 'Maracaibo', 'Alexander Pfister', 2019, 'Board Movement', 3.9, 8.3),
+    (11, 'Takenoko', 'Antoine Bauza', 2011, 'Grid Movement', 2, 7.3),
+    (12, 'Pret-a-Porter', 'Piotr Haraszczak', 2010, 'Worker Placement', 3.6, 7.4),
+    (13, 'Concordia', 'Mac Gerdts', 2013, 'Area Control', 3.0, 8.1),
+    (14, 'Cat Lady', 'Josh Wood', 2017, 'Set Collection', 1.5, 7.1),
+    (15, '7 Wonders', 'Antoine Bauza', 2010, 'Card Drafting', 2.3, 7.8);
+    
+CREATE TABLE plays
+      (
+		play_id INT NOT NULL,
+        game_id INT,
+        date DATE,
+        number_of_players INT,
+        winner VARCHAR(100),
+        winning_score INT,
+		    time_played_in_min INT,
+        PRIMARY KEY (play_id)
+      );
+      
+INSERT INTO plays (play_id, game_id, date, number_of_players, winner, winning_score, time_played_in_min)
+VALUES  (1, 1, '2019-10-09', 3, 'Laura', 75, 180),
+	    	(2, 2, '2020-02-22', 4, 'Rob', 72, 180),
+        (3, 2, '2020-01-24', 3, 'Jason', 69, 165),
+        (4, 2, '2020-04-07', 2, 'Rob', 56, 90),
+        (5, 3, '2019-11-02', 5, 'Jason', 41, 20),
+        (6, 4, '2020-02-01', 3, 'Kevin', 54, 60),
+        (7, 6, '2019-12-05', 4, 'Laura', 132, 135),
+        (8, 6, '2019-10-15', 2, 'Rob', 111, 30),
+        (9, 7, '2020-02-05', 4, 'Unknown', 80, 90),
+        (10, 9, '2020-02-29', 3, 'Lucas', 99, 30),
+		    (11, 9, '2020-02-26', 2, 'Laura', 89, 15),
+        (12, 10, '2020-05-23', 4, 'Rob', 223, 210),
+        (13, 11, '2020-02-26', 3, 'Mark', 34, 60),
+        (14, 12, '2019-10-30', 4, 'Derek', 409, 160),
+        (15, 13, '2020-02-17', 4, 'J', 135, 205),
+        (16, 14, '2020-02-17', 4, 'Lucas', 30, 20),
+        (17, 14, '2020-02-16', 2, 'Laura', 52, 15),
+        (18, 14, '2020-02-19', 2, 'Rob', 44, 10),
+        (19, 15, '2019-10-09', 6, 'Rob', 53, 40),
+	    	(20, 10, '2020-05-25', 2, 'Rob', 237, 100),
+        (21, 9, '2020-02-28', 5, 'Laura', 86, 25);
+
+        -- What's the average weight of the games in my collection?
+        SELECT AVG (weight) FROM boardgames;
+        
+        -- For which designers do I have more than one game in my collection?
+        SELECT designer FROM boardgames
+        GROUP BY designer
+        HAVING COUNT(designer)>1;
+        
+        -- How often did I play with only 1 other player?
+        SELECT COUNT(number_of_players) FROM plays WHERE number_of_players = '2';
+        
+        -- How many times did I win?
+        SELECT COUNT(winner) FROM plays WHERE winner = 'Laura';
+        
+        -- How many minutes did I play in February 2020?
+        SELECT SUM(time_played_in_min) FROM plays WHERE date BETWEEN '2020-02-01' AND '2020-02-29';
+        
+        -- How many different games did I play in February 2020?
+        SELECT COUNT(DISTINCT game_id) FROM plays;
+        
+        -- Who won the most games?
+        SELECT winner, COUNT(*) AS wins
+        FROM plays
+        GROUP BY winner
+        ORDER BY wins DESC
+        LIMIT 1;
