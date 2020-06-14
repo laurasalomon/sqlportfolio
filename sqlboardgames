@@ -1,11 +1,11 @@
--- SQL Boardgame Data Project by Laura Salomon
+-- MySQL Boardgame Data Project by Laura Salomon
 
 CREATE TABLE boardgames
       (
-		    id INT NOT NULL,
+	id INT NOT NULL,
         name VARCHAR(100),
-		    designer VARCHAR(100),
-	    	year_published YEAR,
+	designer VARCHAR(100),
+	year_published YEAR,
         category VARCHAR(100),
         weight DOUBLE,
         rating DOUBLE,
@@ -13,7 +13,7 @@ CREATE TABLE boardgames
       );
 INSERT INTO boardgames (id, name, designer, year_published, category, weight, rating)
 VALUES (1, 'Terraforming Mars', 'Jacob Fryxelius', 2016, 'Tableau Building', 3.2, 8.4),
-	  (2, 'Great Western Trail', 'Alexander Pfister', 2016, 'Board Movement', 3.7, 8.3),
+    (2, 'Great Western Trail', 'Alexander Pfister', 2016, 'Board Movement', 3.7, 8.3),
     (3, 'Sushi Go', 'Phil Walker-Harding', 2013, 'Card Drafting', 1.2, 7.6),
     (4, 'Dominion', 'Donald X. Vaccarino', 2008, 'Deck Building', 2.4, 7.6),
     (5, 'Settlers of Catan', 'Klaus Teuber', 1995, 'Area Control', 2.3, 7.2),
@@ -30,19 +30,19 @@ VALUES (1, 'Terraforming Mars', 'Jacob Fryxelius', 2016, 'Tableau Building', 3.2
     
 CREATE TABLE plays
       (
-		play_id INT NOT NULL,
+	play_id INT NOT NULL,
         game_id INT,
         date DATE,
         number_of_players INT,
         winner VARCHAR(100),
         winning_score INT,
-		    time_played_in_min INT,
+	time_played_in_min INT,
         PRIMARY KEY (play_id)
       );
       
 INSERT INTO plays (play_id, game_id, date, number_of_players, winner, winning_score, time_played_in_min)
 VALUES  (1, 1, '2019-10-09', 3, 'Laura', 75, 180),
-	    	(2, 2, '2020-02-22', 4, 'Rob', 72, 180),
+	(2, 2, '2020-02-22', 4, 'Rob', 72, 180),
         (3, 2, '2020-01-24', 3, 'Jason', 69, 165),
         (4, 2, '2020-04-07', 2, 'Rob', 56, 90),
         (5, 3, '2019-11-02', 5, 'Jason', 41, 20),
@@ -51,7 +51,7 @@ VALUES  (1, 1, '2019-10-09', 3, 'Laura', 75, 180),
         (8, 6, '2019-10-15', 2, 'Rob', 111, 30),
         (9, 7, '2020-02-05', 4, 'Unknown', 80, 90),
         (10, 9, '2020-02-29', 3, 'Lucas', 99, 30),
-		    (11, 9, '2020-02-26', 2, 'Laura', 89, 15),
+	(11, 9, '2020-02-26', 2, 'Laura', 89, 15),
         (12, 10, '2020-05-23', 4, 'Rob', 223, 210),
         (13, 11, '2020-02-26', 3, 'Mark', 34, 60),
         (14, 12, '2019-10-30', 4, 'Derek', 409, 160),
@@ -60,7 +60,7 @@ VALUES  (1, 1, '2019-10-09', 3, 'Laura', 75, 180),
         (17, 14, '2020-02-16', 2, 'Laura', 52, 15),
         (18, 14, '2020-02-19', 2, 'Rob', 44, 10),
         (19, 15, '2019-10-09', 6, 'Rob', 53, 40),
-	    	(20, 10, '2020-05-25', 2, 'Rob', 237, 100),
+	(20, 10, '2020-05-25', 2, 'Rob', 237, 100),
         (21, 9, '2020-02-28', 5, 'Laura', 86, 25);
 
         -- What's the average weight of the games in my collection?
@@ -79,13 +79,60 @@ VALUES  (1, 1, '2019-10-09', 3, 'Laura', 75, 180),
         
         -- How many minutes did I play in February 2020?
         SELECT SUM(time_played_in_min) FROM plays WHERE date BETWEEN '2020-02-01' AND '2020-02-29';
+	
+	 -- How many minutes did I play in the last 30 days?
+	  SELECT SUM(time_played_in_min) FROM plays 
+	  WHERE date BETWEEN CURDATE() - INTERVAL 30 DAY AND CURDATE();
         
         -- How many different games did I play in February 2020?
         SELECT COUNT(DISTINCT game_id) FROM plays;
         
-        -- Who won the most games?
+        -- Who won the most games? (Simple version if there are no ties)
         SELECT winner, COUNT(*) AS wins
         FROM plays
         GROUP BY winner
         ORDER BY wins DESC
         LIMIT 1;
+	
+	--Who won the most games? (Complex version considering ties)
+	SELECT winner, COUNT(winner) AS wins 
+	FROM plays
+	GROUP BY winner
+	HAVING COUNT(winner)=
+	(
+		SELECT MAX(wins) 
+		FROM 	
+		(
+			SELECT winner, COUNT(winner) AS wins
+			FROM plays AS wincount
+			GROUP BY winner
+		) 
+		AS maxwins
+	);
+	
+	-- How often have I played "Great Western Trail"?
+	SELECT COUNT(*) from plays
+	JOIN boardgames ON plays.game_id=boardgames.id
+	WHERE boardgames.name = 'Great Western Trail';
+	
+	-- How many minutes did I spend playing games in a category that contains "building"?
+	SELECT SUM(time_played_in_min) 
+	FROM plays
+	JOIN boardgames ON plays.game_id = boardgames.id
+	WHERE boardgames.category LIKE '%Building%';
+	
+	-- How many times have I played each of my games?
+	SELECT boardgames.name, COUNT(plays.play_id) AS plays
+	FROM plays
+	RIGHT JOIN boardgames ON plays.game_id = boardgames.id
+	GROUP BY boardgames.name
+	ORDER BY plays DESC
+	
+	-- What's the weight of each of my games in words?
+	SELECT name, weight, 
+	CASE
+		WHEN weight >3 THEN 'Heavy'
+   		WHEN weight >2 THEN 'Medium'
+  		ELSE 'Light'
+	END AS weight_description
+	FROM boardgames;
